@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #0a0a0a;
+  --bg-elevated: #131312;
+  --surface: rgba(245, 241, 232, 0.04);
+  --border: rgba(245, 241, 232, 0.08);
+  --border-strong: rgba(245, 241, 232, 0.14);
+  --text-primary: #f5f1e8;
+  --text-secondary: #a8a39a;
+  --text-tertiary: #6b6760;
+  --accent: #d97757;
+  --accent-soft: rgba(217, 119, 87, 0.12);
+  --accent-glow: rgba(217, 119, 87, 0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle textured background — paper-like */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at top, rgba(217, 119, 87, 0.05), transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(245, 241, 232, 0.02), transparent 50%);
+}
+
+/* Typography */
+.font-display {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial), serif;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+/* Surface — replaces .card */
+.surface {
+  background-color: rgba(19, 19, 18, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.surface-strong {
+  background-color: rgba(19, 19, 18, 0.8);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(245, 241, 232, 0.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(245, 241, 232, 0.16); }
+
+::selection {
+  background-color: var(--accent-glow);
+  color: var(--text-primary);
+}
+
+/* Active nav state */
+.nav-item-active {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Pulse ring for the primary CTA */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  70% { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s infinite;
+}
