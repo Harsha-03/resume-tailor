@@ -6,7 +6,7 @@ import { checkRateLimit, getClientIp, limiters } from "@/app/lib/ratelimit";
 import type { AnalyzeResult } from "@/app/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
