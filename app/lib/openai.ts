@@ -4,7 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-5-mini";
+const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-5-nano";
 
 /**
  * Call OpenAI Chat Completions with strict JSON output.
