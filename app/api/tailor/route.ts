@@ -100,13 +100,27 @@ function validateEmail(email: string | undefined, sourceText: string): string {
   return "";
 }
 
-function normalizeSectionOrder(order: any): SectionId[] {
-  if (!Array.isArray(order)) return [...DEFAULT_SECTION_ORDER];
-  const filtered = order
-    .filter((s): s is SectionId => VALID_SECTIONS.includes(s as SectionId))
-    .filter((s, i, arr) => arr.indexOf(s) === i);
-  const missing = DEFAULT_SECTION_ORDER.filter((s) => !filtered.includes(s));
-  return [...filtered, ...missing];
+function normalizeSectionOrder(order: any, summary: string): SectionId[] {
+  let arr: SectionId[];
+  if (!Array.isArray(order)) {
+    arr = [...DEFAULT_SECTION_ORDER];
+  } else {
+    const filtered = order
+      .filter((s): s is SectionId => VALID_SECTIONS.includes(s as SectionId))
+      .filter((s, i, a) => a.indexOf(s) === i);
+    const missing = DEFAULT_SECTION_ORDER.filter((s) => !filtered.includes(s));
+    arr = [...filtered, ...missing];
+  }
+
+  // FORCE summary to be FIRST whenever the tailored resume has one.
+  // The summary is the first 3 seconds of recruiter attention; it must never
+  // render below experience/projects/skills/education. This bypasses any
+  // misordering the AI returns.
+  const hasSummary = Boolean(summary && summary.trim());
+  arr = arr.filter((s) => s !== "summary");
+  if (hasSummary) arr = ["summary", ...arr];
+
+  return arr;
 }
 
 export async function POST(req: NextRequest) {
@@ -178,15 +192,17 @@ export async function POST(req: NextRequest) {
       })
     );
 
+    const cleanSummary = stripAIDashes(data.summary || "");
+
     const tailored: TailoredResume = {
       name: data.name || "",
       contact: validatedContact,
-      summary: stripAIDashes(data.summary || ""),
+      summary: cleanSummary,
       skills: Array.isArray(data.skills) ? data.skills.map((s: string) => stripAIDashes(s)) : [],
       experience: cleanExperience,
       education: cleanEducation,
       projects: validatedProjects,
-      sectionOrder: normalizeSectionOrder(data.sectionOrder),
+      sectionOrder: normalizeSectionOrder(data.sectionOrder, cleanSummary),
     };
 
     return NextResponse.json(

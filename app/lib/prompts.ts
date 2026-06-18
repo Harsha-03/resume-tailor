@@ -69,16 +69,48 @@ const SUMMARY_RULES = `SUMMARY TAILORING (high-impact for ATS + recruiter):
 
 The summary is the first 3 seconds of recruiter attention. Build it like this:
 
-1. FIRST SENTENCE: Lead with the candidate's identity USING THE JD'S ROLE LANGUAGE.
-   - If JD says "Experience Designer focused on AI", summary opens "Experience Designer focused on AI-powered interfaces..."
-   - If JD says "Senior Product Designer for B2B SaaS", summary opens "Product designer with 4+ years in B2B SaaS..."
-   - Mirror the JD's exact role phrasing where truthful.
+1. FIRST SENTENCE: Lead with the candidate's STATED IDENTITY from the original resume. Do NOT swap their identity for the JD's role title.
+   - If the candidate's original summary opens with "Product designer focused on interaction design", the tailored summary opens with "Product designer" (or a close variant like "Product designer and frontend engineer"). It does NOT open with "UI Designer" or "Software Engineer" just because the JD uses those words.
+   - The JD's role language can be incorporated as a SECONDARY qualifier: "Product designer with experience building UI for data-heavy dashboards" — keeps their identity, adds the JD's keywords.
+   - The candidate's stated identity is what THEY have decided to be known as. Adding JD vocabulary AROUND that identity is tailoring. REPLACING that identity is misrepresentation.
+   - If the candidate's original resume has NO summary at all, then and only then may you lead with a JD-derived role description.
 
 2. SECOND SENTENCE: Concrete capabilities the JD asks for, in the JD's vocabulary, that the candidate genuinely has.
 
 3. THIRD-FIFTH SENTENCES: Proof. Specific outcomes, numbers, named tools.
 
 KEEP IT TO 3-5 LINES. No fluff. No "passionate about" or "results-driven."`;
+
+const PRESERVATION_RULES = `IMMUTABLE FIELDS — COPY VERBATIM (do not paraphrase, do not soften):
+
+These elements from the source resume MUST appear unchanged in the output. Drift on these is a bug:
+
+1. JOB TITLES — Copy each job title EXACTLY as written in the source, including parentheticals.
+   - "UI/UX Designer & Frontend Developer (Intern)" stays "UI/UX Designer & Frontend Developer (Intern)". Do NOT drop "(Intern)".
+   - "Sr. Product Designer (Contract)" stays "Sr. Product Designer (Contract)".
+   - You may reorder, rephrase, or compress bullets UNDER a title, but NEVER change the title itself.
+
+2. EMPLOYER NAMES, SCHOOLS, DATES — Copy verbatim.
+   - "Saint Louis University" stays "Saint Louis University", not "SLU" or "St. Louis University".
+   - "Jan 2024 - Dec 2025" stays "Jan 2024 - Dec 2025".
+
+3. SPECIFIC NAMED FACTS — When the source resume contains a specific named entity, event, person, date, or proof point, copy it verbatim. Do not soften specifics into generalities.
+   - "Starbucks CEO's Oct 2024 earnings call" stays verbatim. Do NOT generalize to "executive discussion" or "leadership commentary".
+   - "GPT-4o-mini" stays "GPT-4o-mini", not "an LLM" or "AI model".
+   - "DreamStream platform" stays "DreamStream", not "client platform".
+   - If you cannot fit the specific in cleanly, OMIT the entire bullet rather than soften the specific.
+
+4. QUANTITATIVE FACTS — Numbers, percentages, counts stay exact.
+   - "80% of new client acquisition" stays "80%", not "the majority".
+   - "10+ client web products" stays "10+", not "multiple" or "several".
+
+5. VERB FIDELITY — Do not inflate the candidate's authority.
+   - If the source says "Ran async design reviews", do NOT change to "Led" unless "led" is genuinely more accurate.
+   - If source says "Managed interns", do NOT change to "Mentored" — they're different scopes.
+   - If source says "Owned end-to-end design", that stays. Don't change to "Led design" — owned is stronger.
+   - Preserve the original verb unless the rewrite is materially better AND still accurate.
+
+THE RULE: anything that could be fact-checked against the source resume must match the source resume.`;
 
 const SKILLS_RULES = `SKILLS REORDERING:
 
@@ -176,6 +208,8 @@ export const REWRITE_BULLETS_PROMPT = (
 
 ${REFRAMING_RULES}
 
+${PRESERVATION_RULES}
+
 ${FEWSHOT_BULLETS}
 
 Now apply these standards to the candidate's resume.
@@ -245,6 +279,8 @@ ${REFRAMING_RULES}
 
 ${SUMMARY_RULES}
 
+${PRESERVATION_RULES}
+
 ${SKILLS_RULES}
 
 ${FEWSHOT_BULLETS}
@@ -258,16 +294,18 @@ You are an expert resume tailoring assistant. Take the candidate's RESUME and re
 WORKFLOW (think through these silently before writing):
 1. Read JD, extract key concepts/keywords/role identity.
 2. For each concept, classify: already covered / reframable / genuinely absent.
-3. Build summary using SUMMARY_RULES (JD-anchored first line).
+3. Build summary using SUMMARY_RULES (preserve candidate's stated identity; add JD vocabulary AROUND it).
 4. Reorder skills using SKILLS_RULES (JD-relevant first).
 5. Rewrite bullets, applying REFRAMING_RULES where legitimate.
 6. Detect and preserve original section order.
+7. Verify PRESERVATION_RULES: every job title matches the source verbatim (including parentheticals like "(Intern)"), every named entity is preserved, every number is exact.
 
 Rules:
 - Do NOT fabricate experience, employers, dates, schools, or numbers.
 - Do NOT claim concepts the candidate has not actually done.
 - DO reframe existing work using JD vocabulary when the underlying claim stays truthful.
-- Keep all original employers, titles, and dates intact.
+- Keep all original employer names, job titles (INCLUDING parentheticals like "(Intern)" or "(Contract)"), and dates intact and VERBATIM.
+- Preserve specific named entities (CEOs, named events, dates, products) verbatim — do not generalize "Starbucks CEO's Oct 2024 earnings call" to "executive discussion".
 - Each experience bullet: starts with strong verb, under 28 words, quantified when possible.
 - NO EM DASHES (—) ANYWHERE in the output.
 - Tone: ${tone}
